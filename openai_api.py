@@ -26,8 +26,8 @@ def call_api(file__id):
             "content": [
                 {"type": "input_text",
                  "text": ("find coordinates in this picture, then convert it to decimal coordinate format,"
-                            "just return the pair value, for example: '4.2168, 126.7910', "
-                            "if not found or does not match the required format, just return '0, 0'")
+                            "just return the pair value like this example: 4.2168,126.7910, "
+                            "if not found, just return 0,0")
                 },
                 {
                     "type": "input_image",
@@ -41,7 +41,6 @@ def call_api(file__id):
 
 if __name__ == "__main__":
     for file_name in tqdm(sorted(os.listdir(folder_path))):
-        
         if file_name.lower().endswith((".png", ".jpg", ".jpeg", ".bmp")):
             img_path = os.path.join(folder_path, file_name)
             file_id = create_file(img_path)
@@ -49,4 +48,4 @@ if __name__ == "__main__":
 
             output_text = response.output_text
             with open("output.csv", "a") as file:
-                file.write(file_name + "," + output_text.replace(" ", "") + "\n")
+                file.write(file_name + "," + output_text.strip() + "\n")
