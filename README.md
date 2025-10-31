@@ -10,7 +10,7 @@ Install Python 3.14 or newer in your system.
 
 Clone this repository
 ```bash
-git clone ...
+git clone https://github.com/maulanaisa/timestamp-extractor.git
 ```
 
 Open repository folder in your terminal, create virtual environment and activate it.
@@ -40,7 +40,7 @@ SETTINGS = {
 ```
 
 ### OpenAI API Module
-Use openai_api.py to extract coordinates from images in the FOLDER_PATH from settings.py
+Use openai_api.py to extract coordinates from images in the FOLDER_PATH from settings.py.
 
 ```bash
 python openai_api.py
@@ -48,7 +48,7 @@ python openai_api.py
 this will export output.csv containing filename, coordinate1, coordinate2.
 
 ### Main Module
-Use main.py to export workbook file (.xlsx) containing images from FOLDER_PATH and output.csv values. The workbook will be saved in EXPORT_PATH from settings.py
+Use main.py to export workbook file (.xlsx) containing images from FOLDER_PATH and output.csv values. The workbook will be saved in EXPORT_PATH from settings.py.
 ```bash
 python main.py
 ```
