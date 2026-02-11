@@ -5,7 +5,7 @@ from openpyxl.drawing.image import Image as pyxlImage
 from tqdm import tqdm
 from PIL import Image, ImageOps
 
-from utils import delete_directory, create_directory
+from utils import delete_directory, create_directory, detect_closest_coordinate, coor_csv_to_dict
 
 
 class Pohon:
@@ -16,6 +16,7 @@ class Pohon:
         self.folder_path = settings["FOLDER_PATH"]
         self.export_path = settings["EXPORT_PATH"]
         self.image_dimension = settings["IMAGE_DIMENSION"]
+        self.location_coordinates = settings["LOCATION_COORDINATES"]
 
     def only_images(self):
         # Loop through all files in folder
@@ -26,10 +27,10 @@ class Pohon:
         for file_name in tqdm(sorted(os.listdir(self.folder_path))):
             if file_name.lower().endswith((".png", ".jpg", ".jpeg", ".bmp")):
                 img_path = os.path.join(self.folder_path, file_name)
-                temp_img_path = os.path.join(temp_folder_name, file_name)   # Temporary path to store fixed images
+                temp_img_path = os.path.join(temp_folder_name, f"{os.path.splitext(file_name)[0]}.jpg")   # Temporary path to store fixed images
                 with Image.open(img_path) as img:
                     img_fixed = ImageOps.exif_transpose(img)    # Fix image orientation and save to temporary path
-                    img_fixed.save(temp_img_path)
+                    img_fixed.save(temp_img_path, "JPEG", quality=15, optimize=True)
 
                 # Open temporary image
                 img_pyxl = pyxlImage(temp_img_path)
@@ -52,7 +53,7 @@ class Pohon:
         # Delete temporary folder
         delete_directory(temp_folder_name)
 
-    def images_with_coordinates(self):
+    def images_with_coordinates(self, no_location_detection:bool):
         if os.path.exists("output.csv"):
             row = 1
             temp_folder_name = os.path.join(self.folder_path, "temp")
@@ -69,10 +70,10 @@ class Pohon:
                     longitude = csv_row[2]
 
                     img_path = os.path.join(self.folder_path, file_name)
-                    temp_img_path = os.path.join(temp_folder_name, file_name)   # Temporary path to store fixed images
+                    temp_img_path = os.path.join(temp_folder_name, f"{os.path.splitext(file_name)[0]}.jpg")   # Temporary path to store fixed images
                     with Image.open(img_path) as img:
                         img_fixed = ImageOps.exif_transpose(img)    # Fix image orientation and save to temporary path
-                        img_fixed.save(temp_img_path)
+                        img_fixed.save(temp_img_path, "JPEG", quality=15, optimize=True)
 
                     # Open temporary image
                     img_pyxl = pyxlImage(temp_img_path)
@@ -81,11 +82,21 @@ class Pohon:
                     img_pyxl.height = self.image_dimension["height"]
                     img_pyxl.width = self.image_dimension["width"]
                     
+                    # Add location detection
+                    if no_location_detection:
+                        location = ""
+                    else:
+                        if os.path.exists(self.location_coordinates):
+                            coor_dict = coor_csv_to_dict(self.location_coordinates)    
+                            location = detect_closest_coordinate(coor_dict, (latitude, longitude))
+                        else:
+                            raise FileNotFoundError(".csv location file missing! Please check settings.py on LOCATION_COORDINATES")
+
                     # Add image, filename, and coordinates to worksheet
-                    self.ws.add_image(img_pyxl, f"A{row}")
-                    self.ws[f"B{row}"] = file_name
-                    self.ws[f"C{row}"] = latitude
-                    self.ws[f"D{row}"] = longitude
+                    self.ws[f"A{row}"] = row
+                    self.ws[f"B{row}"] = location
+                    self.ws.add_image(img_pyxl, f"D{row}")  
+                    self.ws[f"C{row}"] = f"{latitude}, {longitude}"
 
                     # Move to next row (e.g., one row down per image)
                     row += 1   # adjust spacing (1 row(s) per picture)
@@ -96,7 +107,6 @@ class Pohon:
 
             # Delete temporary folder
             delete_directory(temp_folder_name)
-                    
-                    
+                                    
         else:
-            print("output.csv not found!, please generate first.")
+            raise FileNotFoundError("output.csv not found!, please generate first.")
