@@ -2,11 +2,11 @@ from openai import OpenAI
 import os
 from tqdm import tqdm
 
-from settings import SETTINGS
+from settings import SETTINGS, OPENAI_API_IMAGE
 
 client = OpenAI()
 
-folder_path = SETTINGS["FOLDER_PATH"]
+folder_path = SETTINGS["IMAGES_PATH"]
 
 # Function to create a file with the Files API
 def create_file(file_path):
@@ -20,14 +20,12 @@ def create_file(file_path):
 
 def call_api(file__id):
     api_response = client.responses.create(
-        model="gpt-5",
+        model=OPENAI_API_IMAGE["MODEL"],
         input=[{
             "role": "user",
             "content": [
                 {"type": "input_text",
-                 "text": ("find coordinates in this picture, then convert it to decimal coordinate format,"
-                            "just return the pair value like this example: 4.2168,126.7910, "
-                            "if not found, just return 0,0")
+                 "text": OPENAI_API_IMAGE["PROMPT"]
                 },
                 {
                     "type": "input_image",
@@ -47,5 +45,10 @@ if __name__ == "__main__":
             response = call_api(file_id)
 
             output_text = response.output_text
-            with open("output.csv", "a") as file:
-                file.write(file_name + "," + output_text.strip() + "\n")
+            with open("output_openai_api.csv", "a") as file:
+                if OPENAI_API_IMAGE["OUTPUT"] == "coordinates-custom":
+                    file.write(file_name + "," + output_text.strip() + "\n")
+                elif OPENAI_API_IMAGE["OUTPUT"] == "" or OPENAI_API_IMAGE["OUTPUT"] is None:
+                    file.write(file_name + "," + output_text + "\n")
+                else:
+                    raise ValueError("Output type not found!")

@@ -28,36 +28,16 @@ pip install -r requirements.txt
 
 Open settings.py file to configure parameters.
 
-```python
-SETTINGS = {
-    "IMAGE_DIMENSION" : {
-        "height" : 150,
-        "width" : 120,
-    },
-    "FOLDER_PATH" : r"C:\Users\myuser\Downloads\TO penebangan-20251028T071712Z-1-001\TO penebangan",
-    "EXPORT_PATH" : r"C:\Users\myuser\Desktop\test.xlsx",
-}
-```
-
 ### OpenAI API Module
-Use openai_api.py to extract coordinates from images in the FOLDER_PATH from settings.py.
+Use openai_api.py to extract coordinates from images. Use IMAGES_PATH to configure where the image folder is.
 
 ```bash
 python openai_api.py
 ```
-this will export output.csv containing filename, coordinate1, coordinate2.
+this will export output_open_ai.csv containing filename, latitude, longitude.
 
 ### Main Module
-Use main.py to export workbook file (.xlsx) containing images from FOLDER_PATH and output.csv values. The workbook will be saved in EXPORT_PATH from settings.py.
+Use main.py to export workbook file (.xlsx) containing images from IMAGES_PATH which also listed in output_openai_api.csv. The workbook will be saved to EXPORT_PATH. This module also does location detection based on csv file located in LOCATION_COORDINATES.
 ```bash
 python main.py
-```
-
-If you only need to export images to workbook, then add optional parameters.
-```bash
-python main.py --images_only
-```
-or
-```bash
-python main.py -i
 ```

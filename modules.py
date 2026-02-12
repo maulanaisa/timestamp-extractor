@@ -7,60 +7,25 @@ from PIL import Image, ImageOps
 
 from utils import delete_directory, create_directory, detect_closest_coordinate, coor_csv_to_dict
 
-
 class Pohon:
     def __init__(self, settings):
         self.wb = Workbook()
         self.ws = self.wb.active
 
-        self.folder_path = settings["FOLDER_PATH"]
+        self.openai_api_path = "output_openai_api.csv"
+        self.images_path = settings["IMAGES_PATH"]
         self.export_path = settings["EXPORT_PATH"]
         self.image_dimension = settings["IMAGE_DIMENSION"]
         self.location_coordinates = settings["LOCATION_COORDINATES"]
+        self.image_quality = settings["IMAGE_QUALITY"]
 
-    def only_images(self):
-        # Loop through all files in folder
-        row = 1
-        temp_folder_name = os.path.join(self.folder_path, "temp")
-        create_directory(temp_folder_name)
-            
-        for file_name in tqdm(sorted(os.listdir(self.folder_path))):
-            if file_name.lower().endswith((".png", ".jpg", ".jpeg", ".bmp")):
-                img_path = os.path.join(self.folder_path, file_name)
-                temp_img_path = os.path.join(temp_folder_name, f"{os.path.splitext(file_name)[0]}.jpg")   # Temporary path to store fixed images
-                with Image.open(img_path) as img:
-                    img_fixed = ImageOps.exif_transpose(img)    # Fix image orientation and save to temporary path
-                    img_fixed.save(temp_img_path, "JPEG", quality=15, optimize=True)
-
-                # Open temporary image
-                img_pyxl = pyxlImage(temp_img_path)
-
-                # Resize image (width x height in pixels)
-                img_pyxl.height = self.image_dimension["height"]
-                img_pyxl.width = self.image_dimension["width"]
-                
-                # Add image and filename to worksheet
-                self.ws.add_image(img_pyxl, f"A{row}")
-                self.ws[f"B{row}"] = file_name
-
-                # Move to next row (e.g., one row down per image)
-                row += 1   # adjust spacing (1 row(s) per picture)
-
-        # Save the workbook
-        self.wb.save(self.export_path)
-        print(f"Workbook {self.export_path} is created successfully.")
-
-        # Delete temporary folder
-        delete_directory(temp_folder_name)
-
-    def images_with_coordinates(self, no_location_detection:bool):
-        if os.path.exists("output.csv"):
+    def images_with_coordinates(self):
+        if os.path.exists(self.openai_api_path):
             row = 1
-            temp_folder_name = os.path.join(self.folder_path, "temp")
+            temp_folder_name = os.path.join(self.images_path, "temp")
             create_directory(temp_folder_name)
-            # Open the CSV file
-            with open('output.csv', 'r', newline='') as csvfile:
-                # Create a CSV reader object
+
+            with open(self.openai_api_path, 'r', newline='') as csvfile:
                 reader = csv.reader(csvfile)
 
                 # Iterate over each row in the CSV file
@@ -69,44 +34,38 @@ class Pohon:
                     latitude = csv_row[1]
                     longitude = csv_row[2]
 
-                    img_path = os.path.join(self.folder_path, file_name)
+                    img_path = os.path.join(self.images_path, file_name)
                     temp_img_path = os.path.join(temp_folder_name, f"{os.path.splitext(file_name)[0]}.jpg")   # Temporary path to store fixed images
-                    with Image.open(img_path) as img:
-                        img_fixed = ImageOps.exif_transpose(img)    # Fix image orientation and save to temporary path
-                        img_fixed.save(temp_img_path, "JPEG", quality=15, optimize=True)
+                    try:
+                        with Image.open(img_path) as img:
+                            img_fixed = ImageOps.exif_transpose(img)    # Fix image orientation and save to temporary path
+                            img_fixed.save(temp_img_path, "JPEG", quality=self.image_quality, optimize=True)
 
-                    # Open temporary image
-                    img_pyxl = pyxlImage(temp_img_path)
+                        img_pyxl = pyxlImage(temp_img_path)
 
-                    # Resize image (width x height in pixels)
-                    img_pyxl.height = self.image_dimension["height"]
-                    img_pyxl.width = self.image_dimension["width"]
-                    
-                    # Add location detection
-                    if no_location_detection:
-                        location = ""
-                    else:
+                        img_pyxl.height = self.image_dimension["height"]
+                        img_pyxl.width = self.image_dimension["width"]
+                        
+                        # If location .csv file exists
                         if os.path.exists(self.location_coordinates):
                             coor_dict = coor_csv_to_dict(self.location_coordinates)    
                             location = detect_closest_coordinate(coor_dict, (latitude, longitude))
                         else:
-                            raise FileNotFoundError(".csv location file missing! Please check settings.py on LOCATION_COORDINATES")
+                            location = ""
 
-                    # Add image, filename, and coordinates to worksheet
-                    self.ws[f"A{row}"] = row
-                    self.ws[f"B{row}"] = location
-                    self.ws.add_image(img_pyxl, f"D{row}")  
-                    self.ws[f"C{row}"] = f"{latitude}, {longitude}"
+                        self.ws[f"A{row}"] = row
+                        self.ws[f"B{row}"] = location
+                        self.ws[f"C{row}"] = f"{latitude}, {longitude}"
+                        self.ws.add_image(img_pyxl, f"D{row}")  
 
-                    # Move to next row (e.g., one row down per image)
-                    row += 1   # adjust spacing (1 row(s) per picture)
+                        row += 1
+                    except:
+                        
 
-            # Save the workbook
             self.wb.save(self.export_path)
             print(f"Workbook {self.export_path} is created successfully.")
 
-            # Delete temporary folder
             delete_directory(temp_folder_name)
                                     
         else:
-            raise FileNotFoundError("output.csv not found!, please generate first.")
+            raise FileNotFoundError("output_openai_api.csv not found!, please generate first.")
