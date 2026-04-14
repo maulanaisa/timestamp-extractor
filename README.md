@@ -1,43 +1,53 @@
-# Getting started
+# Memulai
 
-This module is used to extract coordinates within timestamped images using openai API.
+Modul ini digunakan untuk ekstraksi titik koordinat di gambar dengan timestamp menggunakan OPENAI API.
 
-## Requirements
+## Persyaratan
 
-Install Python 3.14 or newer in your system.
+Instal Python 3.14 di sistem anda.
 
-## Dependencies
+## Instalasi virtual evironment dan library
 
-Clone this repository
+Buka command prompt.
+
+Lalu buka lokasi file modul yang disimpan.
+
+Contoh : Misal modul disimpan di C:\Users\PLN\Documents\Teknik, maka ketik 
 ```bash
-git clone https://github.com/maulanaisa/timestamp-extractor.git
+cd C:\Users\PLN\Documents\Teknik
 ```
 
-Open repository folder in your terminal, create virtual environment and activate it.
+Buat virtual environment.
 ```bash
 python -m venv myenv
+```
+
+Lalu aktifkan virtual environment tersebut
+```bash
 myenv\Scripts\activate
 ```
 
-Install requirements.txt using pip.
+Install kebutuhan library di requirements.txt menggunakan pip.
 ```bash
 pip install -r requirements.txt
 ```
 
-## Usage
+## Penggunaan
 
 Open settings.py file to configure parameters.
+Buka settings.py untuk melakukan konfigurasi parameter.
 
-### OpenAI API Module
-Use openai_api.py to extract coordinates from images. Use IMAGES_PATH to configure where the image folder is.
+### Modul OpenAI API
+Gunakan openai_api.py untuk ekstraksi koordinat dari gambar dengan timestamp. Ubah IMAGES_PATH sesuai dengan lokasi folder yang dikehendaki.
 
+Lalu jalankan script nya.
 ```bash
 python openai_api.py
 ```
-this will export output_open_ai.csv containing filename, latitude, longitude.
+ini akan menghasilkan output_open_ai.csv berisi filename, latitude, longitude.
 
-### Main Module
-Use main.py to export workbook file (.xlsx) containing images from IMAGES_PATH which also listed in output_openai_api.csv. The workbook will be saved to EXPORT_PATH. This module also does location detection based on csv file located in LOCATION_COORDINATES.
+### Modul Utama
+Gunakan main.py untuk eksport workbook file (.xlsx) berisi gambar di IMAGES_PATH yang juga kebetulan sudah di list di output_openai_api.csv. File excel akan disimpan di EXPORT_PATH. Modul ini juga mampu memberikan lokasi berdasarkan file di LOCATION_COORDINATES.
 ```bash
 python main.py
 ```
