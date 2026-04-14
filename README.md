@@ -51,3 +51,10 @@ Gunakan main.py untuk eksport workbook file (.xlsx) berisi gambar di IMAGES_PATH
 ```bash
 python main.py
 ```
+
+### Modul PDF
+
+Untuk konversi pdf ke gambar. Ubah parameter PDF_FOLDER_PATH ke lokasi file pdf, lalu jalankan:
+```bash
+python pdf2images.py
+```
