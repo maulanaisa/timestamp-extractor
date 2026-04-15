@@ -58,9 +58,13 @@ class Pohon:
                         self.ws[f"C{row}"] = f"{latitude}, {longitude}"
                         self.ws.add_image(img_pyxl, f"D{row}")  
 
-                        row += 1
                     except:
-                        
+
+                        self.ws[f"A{row}"] = row
+                        self.ws[f"B{row}"] = location
+                        self.ws[f"C{row}"] = f"{latitude}, {longitude}"
+
+                    row += 1
 
             self.wb.save(self.export_path)
             print(f"Workbook {self.export_path} is created successfully.")
