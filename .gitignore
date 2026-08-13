@@ -1,2 +1,4 @@
 __pycache__/
 output_openai_api.csv
+tagging desa.csv
+optimize.xlsx

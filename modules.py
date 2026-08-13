@@ -39,6 +39,7 @@ class Pohon:
                     try:
                         with Image.open(img_path) as img:
                             img_fixed = ImageOps.exif_transpose(img)    # Fix image orientation and save to temporary path
+                            img_fixed = img_fixed.convert('RGB')
                             img_fixed.save(temp_img_path, "JPEG", quality=self.image_quality, optimize=True)
 
                         img_pyxl = pyxlImage(temp_img_path)
